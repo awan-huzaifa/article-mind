@@ -28,6 +28,23 @@ const getPromptForType = (type: string, content: string) => {
   return prompts[type as keyof typeof prompts] || prompts.concise;
 };
 
+async function fetchArticleContent(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const html = await response.text();
+    return html;
+  } catch (error: unknown) {
+    console.error("Error fetching article:", error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch article: ${error.message}`);
+    }
+    throw new Error('Failed to fetch article: Unknown error occurred');
+  }
+}
+
 export async function POST(req: Request) {
   try {
     console.log("Starting article summarization process...");
@@ -44,21 +61,7 @@ export async function POST(req: Request) {
     try {
       // Fetch the article content with browser-like headers
       console.log("Fetching article content...");
-      const response = await fetch(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-          "Connection": "keep-alive",
-          "Upgrade-Insecure-Requests": "1"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch article: ${response.status} ${response.statusText}`);
-      }
-
-      const html = await response.text();
+      const html = await fetchArticleContent(url);
       console.log("Successfully fetched article content");
 
       // Validate Groq API key
@@ -96,12 +99,15 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ summary });
 
-    } catch (fetchError) {
-      console.error("Error fetching article:", fetchError);
-      throw new Error(`Failed to fetch article: ${fetchError.message}`);
+    } catch (error: unknown) {
+      console.error("Error fetching article:", error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch article: ${error.message}`);
+      }
+      throw new Error('Failed to fetch article: Unknown error occurred');
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in summarization process:", error);
     return NextResponse.json(
       { 
