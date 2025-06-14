@@ -1,11 +1,11 @@
 'use client';
 
-import { useTheme } from 'next-themes';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+//import { useTheme } from 'next-themes';
+//import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 
 export default function Header() {
-  const { theme, setTheme } = useTheme();
+  //const { theme, setTheme } = useTheme();
 
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
